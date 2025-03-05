@@ -1,0 +1,6 @@
+flask==3.0.2
+python-dotenv==1.0.0
+flask-sqlalchemy==3.1.1
+flask-migrate==4.0.5
+flask-cors==4.0.0
+typing-extensions==4.9.0
