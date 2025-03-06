@@ -15,9 +15,12 @@ class AgentManager:
         """获取所有agent的信息"""
         return [agent.get_info() for agent in self.agents.values()]
 
-    def get_agent(self, agent_type: str):
-        """获取指定类型的agent"""
-        return self.agents.get(agent_type)
+    def get_agent(self, agent_type: str) -> Dict[str, Any]:
+        """获取指定类型的agent信息"""
+        agent = self.agents.get(agent_type)
+        if agent:
+            return agent.get_info()
+        return None
 
     def greet(self, agent_type: str) -> str:
         """获取指定agent的问候语"""
