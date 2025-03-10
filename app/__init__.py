@@ -7,6 +7,10 @@ from .models.agents import repeater
 def create_app(config=None):
     app = Flask(__name__)
 
+    # 使用默认配置
+    if config is None:
+        config = {}
+
     # 配置数据库
     app.config['SQLALCHEMY_DATABASE_URI'] = config.get('DATABASE_URI', 'sqlite:///multiagent.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
