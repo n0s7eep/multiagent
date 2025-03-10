@@ -1,23 +1,27 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_cors import CORS
-from config import Config
+from .models import db
+from .api import init_app
+from .models.agents import repeater
 
-db = SQLAlchemy()
-migrate = Migrate()
-
-def create_app(config_class=Config):
+def create_app(config=None):
     app = Flask(__name__)
-    app.config.from_object(config_class)
+
+    # 配置数据库
+    app.config['SQLALCHEMY_DATABASE_URI'] = config.get('DATABASE_URI', 'sqlite:///multiagent.db')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # 初始化扩展
-    db.init_app(app)
-    migrate.init_app(app, db)
     CORS(app)
+    db.init_app(app)
 
-    # 注册蓝图
-    from app.api import bp as api_bp
-    app.register_blueprint(api_bp, url_prefix='/api')
+    # 注册路由
+    init_app(app)
+
+    # 创建数据库表
+    with app.app_context():
+        db.create_all()
+        # 初始化 agents
+        repeater.init_app(app)
 
     return app

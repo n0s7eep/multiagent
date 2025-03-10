@@ -1,6 +1,22 @@
-flask==3.0.2
-python-dotenv==1.0.0
-flask-sqlalchemy==3.1.1
-flask-migrate==4.0.5
-flask-cors==4.0.0
-typing-extensions==4.9.0
+# Web框架
+fastapi>=0.68.0
+uvicorn>=0.15.0
+
+# 数据库
+sqlalchemy>=1.4.0
+alembic>=1.7.0
+
+# HTTP客户端
+aiohttp>=3.8.0
+
+# 工具库
+python-dotenv>=0.19.0
+pydantic>=1.8.0
+
+# 测试
+pytest>=6.2.0
+pytest-asyncio>=0.15.0
+httpx>=0.18.0
+
+# 类型提示
+typing-extensions>=3.10.0

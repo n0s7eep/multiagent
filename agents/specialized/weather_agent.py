@@ -1,6 +1,7 @@
 from typing import Dict, Any
+from agents.base.base_agent import BaseAgent
 
-class WeatherAgent:
+class WeatherAgent(BaseAgent):
     def __init__(self):
         self.name = "Weather Agent"
         self.description = "一个关心天气的机器人"
