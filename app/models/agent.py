@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Generator
 from .base import db
 
 class Agent(db.Model):
@@ -28,5 +29,10 @@ class Agent(db.Model):
         }
 
     def generate_response(self, message: str) -> str:
-        """生成回复"""
+        """生成回复（同步方式）"""
         raise NotImplementedError("Agent子类必须实现generate_response方法")
+
+    def generate_response_stream(self, message: str) -> Generator[str, None, None]:
+        """生成流式回复"""
+        # 默认实现：将同步响应转换为流式响应
+        yield self.generate_response(message)

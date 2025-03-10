@@ -1,4 +1,6 @@
 from uuid import uuid4
+from typing import Generator
+import time
 from ..base import db
 from ..agent import Agent
 
@@ -17,13 +19,33 @@ class RepeaterAgent(Agent):
             name="复读机",
             type="repeater",
             description="我是一个复读机，我会重复你说的话",
-            capabilities=["repeat"]
+            capabilities=["repeat", "stream"]
         )
         return agent
 
     def generate_response(self, message: str) -> str:
         """生成回复 - 简单重复用户的消息"""
         return message
+
+    def generate_response_stream(self, message: str) -> Generator[str, None, None]:
+        """生成流式回复 - 带开场白和延时的逐字返回"""
+        # 先发送开场白
+        intro = "开始重复："
+        # for char in intro:
+        #     yield char
+        yield intro
+
+        # 发送换行
+        yield "\n"
+
+        # 等待1秒
+        time.sleep(1)
+
+        yield message
+
+        # # 逐字返回消息
+        # for char in message:
+        #     yield char
 
 def init_app(app):
     """初始化复读机Agent"""
