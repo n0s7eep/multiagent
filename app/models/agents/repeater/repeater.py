@@ -1,8 +1,8 @@
 from uuid import uuid4
 from typing import Generator
 import time
-from ..base import db
-from ..agent import Agent
+from ...base import db
+from ...agent import Agent
 
 class RepeaterAgent(Agent):
     """复读机Agent - 简单重复用户的消息"""
@@ -22,6 +22,19 @@ class RepeaterAgent(Agent):
             capabilities=["repeat", "stream"]
         )
         return agent
+
+    @classmethod
+    def init_app(cls, app):
+        """初始化复读机Agent"""
+        with app.app_context():
+            # 检查是否已存在
+            existing = Agent.query.filter_by(type="repeater").first()
+            if not existing:
+                # 创建新的复读机Agent
+                repeater = cls.create()
+                db.session.add(repeater)
+                db.session.commit()
+                print("复读机Agent已创建")
 
     def generate_response(self, message: str) -> str:
         """生成回复 - 简单重复用户的消息"""
@@ -46,15 +59,3 @@ class RepeaterAgent(Agent):
         # # 逐字返回消息
         # for char in message:
         #     yield char
-
-def init_app(app):
-    """初始化复读机Agent"""
-    with app.app_context():
-        # 检查是否已存在
-        existing = Agent.query.filter_by(type="repeater").first()
-        if not existing:
-            # 创建新的复读机Agent
-            repeater = RepeaterAgent.create()
-            db.session.add(repeater)
-            db.session.commit()
-            print("复读机Agent已创建")

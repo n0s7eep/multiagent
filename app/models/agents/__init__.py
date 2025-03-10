@@ -1,3 +1,4 @@
-from . import repeater
+from .repeater import RepeaterAgent
+from .weather import WeatherAgent
 
-__all__ = ['repeater']
+__all__ = ['RepeaterAgent', 'WeatherAgent']

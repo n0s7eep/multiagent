@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from .models import db
 from .api import init_app
-from .models.agents import repeater
+from .models.agents import RepeaterAgent, WeatherAgent
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -26,6 +26,7 @@ def create_app(config=None):
     with app.app_context():
         db.create_all()
         # 初始化 agents
-        repeater.init_app(app)
+        RepeaterAgent.init_app(app)
+        WeatherAgent.init_app(app)
 
     return app
