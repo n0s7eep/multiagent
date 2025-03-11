@@ -124,30 +124,72 @@ def process_agent_response(app, room_id: str, agent: Agent, message_content: str
             )
             # 广播用户消息给所有客户端
             chat_room_manager.broadcast_to_room(room_id, user_message)
-            # 立即发送思考中
-            stream_msg = create_stream_message(
-                msg_id=msg_id,
-                msg_type='response',
-                content='思考中...',
-                role='assistant',
-                is_end=False,
-                is_thinking=True
-            )
-            chat_room_manager.broadcast_to_room(room_id, stream_msg)
 
             # 使用流式生成回复
             for chunk in agent.generate_response_stream(message_content):
-                full_response.append(chunk)
+                try:
+                    # 解析 JSON 消息
+                    msg_data = json.loads(chunk)
+                    msg_type = msg_data.get('type', '')
+                    msg_content = msg_data.get('content', '')
 
-                # 立即发送当前 chunk
-                stream_msg = create_stream_message(
-                    msg_id=msg_id,
-                    msg_type='response',
-                    content=chunk,
-                    role='assistant',
-                    is_end=False
-                )
-                chat_room_manager.broadcast_to_room(room_id, stream_msg)
+                    # 根据消息类型处理
+                    if msg_type == 'thinking':
+                        # 思考过程消息
+                        stream_msg = create_stream_message(
+                            msg_id=msg_id,
+                            msg_type='response',
+                            content=msg_content,
+                            role='assistant',
+                            is_end=False,
+                            is_thinking=True
+                        )
+                    elif msg_type == 'result':
+                        # 最终结果消息
+                        stream_msg = create_stream_message(
+                            msg_id=msg_id,
+                            msg_type='response',
+                            content=msg_content,
+                            role='assistant',
+                            is_end=False,
+                            is_thinking=False
+                        )
+                        # 只将结果消息添加到最终响应
+                        full_response.append(msg_content)
+                    elif msg_type == 'start':
+                        # 开始消息
+                        stream_msg = create_stream_message(
+                            msg_id=msg_id,
+                            msg_type='response',
+                            content=msg_content,
+                            role='assistant',
+                            is_end=False,
+                            is_thinking=True
+                        )
+                    else:
+                        # 未知类型消息，保持原样发送
+                        stream_msg = create_stream_message(
+                            msg_id=msg_id,
+                            msg_type='response',
+                            content=chunk,
+                            role='assistant',
+                            is_end=False,
+                            is_thinking=False
+                        )
+
+                    chat_room_manager.broadcast_to_room(room_id, stream_msg)
+                except json.JSONDecodeError:
+                    # 如果不是 JSON 格式，按普通消息处理
+                    stream_msg = create_stream_message(
+                        msg_id=msg_id,
+                        msg_type='response',
+                        content=chunk,
+                        role='assistant',
+                        is_end=False,
+                        is_thinking=False
+                    )
+                    full_response.append(chunk)
+                    chat_room_manager.broadcast_to_room(room_id, stream_msg)
 
             # 发送流式响应结束标记
             final_content = ''.join(full_response)
@@ -156,7 +198,8 @@ def process_agent_response(app, room_id: str, agent: Agent, message_content: str
                 msg_type='response',
                 content=final_content,
                 role='assistant',
-                is_end=True
+                is_end=True,
+                is_thinking=False
             )
             chat_room_manager.broadcast_to_room(room_id, end_msg)
 
